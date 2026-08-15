@@ -1,0 +1,35 @@
+name: Backfill Historical Fixtures
+
+# Manual trigger only — go to the Actions tab, pick this workflow, click
+# "Run workflow", choose batch1 or batch2, and click Run. Nothing runs
+# automatically or on a schedule.
+on:
+  workflow_dispatch:
+    inputs:
+      batch:
+        description: "Which batch to backfill"
+        required: true
+        type: choice
+        options:
+          - batch1
+          - batch2
+        default: batch1
+
+jobs:
+  backfill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Run backfill
+        env:
+          APIFOOTBALL_KEY: ${{ secrets.APIFOOTBALL_KEY }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+        run: node scripts/backfill-history.mjs ${{ github.event.inputs.batch }}
