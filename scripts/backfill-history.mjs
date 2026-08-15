@@ -30,6 +30,14 @@ if (!APIFOOTBALL_KEY || !SUPABASE_URL || !SUPABASE_SERVICE_ROLE_KEY) {
   process.exit(1);
 }
 
+// Diagnostic only — never logs the actual secret values, just enough to
+// sanity-check they look like real keys (right rough length, no stray
+// whitespace) rather than an empty/malformed secret slipping past the
+// truthy check above.
+console.log(`APIFOOTBALL_KEY: length=${APIFOOTBALL_KEY.length}, trimmedDiffers=${APIFOOTBALL_KEY !== APIFOOTBALL_KEY.trim()}`);
+console.log(`SUPABASE_URL: length=${SUPABASE_URL.length}, startsWithHttps=${SUPABASE_URL.startsWith("https://")}`);
+console.log(`SUPABASE_SERVICE_ROLE_KEY: length=${SUPABASE_SERVICE_ROLE_KEY.length}, trimmedDiffers=${SUPABASE_SERVICE_ROLE_KEY !== SUPABASE_SERVICE_ROLE_KEY.trim()}`);
+
 // league_key matches LEAGUES[].id in index.html. apiFootballId is looked up
 // dynamically below (via /leagues?search=) rather than hardcoded, so a
 // wrong guess can't silently corrupt the data — it just skips with a warning.
