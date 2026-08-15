@@ -59,7 +59,7 @@ const BATCHES = {
 
 // Last 2 completed seasons as of now. API-Football's "season" is the
 // start year, e.g. 2024 = the 2024/25 season.
-const SEASONS = [2024, 2025];
+const SEASONS = [2023, 2024];
 
 function sleep(ms) { return new Promise(r => setTimeout(r, ms)); }
 
