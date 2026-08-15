@@ -1,0 +1,837 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Soka Edge KE — Real Odds Analyser &amp; Match Verdict</title>
+<meta name="description" content="Kenyan-market football odds analyser: pick teams, pull real form data, compare SportPesa / Betika / Odibets prices in KES and get a clear verdict on who is likely to win.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --deep:#07231A;
+    --deep2:#0C3527;
+    --panel:rgba(9,26,20,0.72);
+    --line:#1D4C3A;
+    --chalk:#F2F5EF;
+    --dim:#9FB6A9;
+    --amber:#E8A33D;
+    --green:#33C27F;
+    --red:#E0574C;
+    --ink:#06170F;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 15% -10%, rgba(51,194,127,0.10), transparent 60%),
+      radial-gradient(900px 500px at 95% 0%, rgba(232,163,61,0.10), transparent 55%),
+      linear-gradient(180deg,var(--deep) 0%, #05170F 100%);
+    color:var(--chalk); font-family:'Inter',system-ui,sans-serif; min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  .flagline{height:5px; background:linear-gradient(90deg,#0F1A14 0 25%, #C1272D 25% 50%, #F2F5EF 50% 55%, #0E7C42 55% 100%);}
+  .wrap{max-width:1150px; margin:0 auto; padding:26px 18px 70px;}
+  header{margin-bottom:20px;}
+  .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--amber); margin:0 0 6px;}
+  h1{font-family:'Oswald',sans-serif; font-weight:700; font-size:clamp(28px,4.4vw,46px); text-transform:uppercase; margin:0 0 8px; letter-spacing:.01em;}
+  .sub{color:var(--dim); font-size:14px; line-height:1.6; margin:0; max-width:720px;}
+  .panel{background:var(--panel); border:1px solid var(--line); border-radius:12px; padding:18px; margin-top:18px;}
+  .panel h2{font-family:'Oswald',sans-serif; font-size:14px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); margin:0 0 14px; display:flex; gap:10px; align-items:center; justify-content:space-between; flex-wrap:wrap;}
+  label{display:block; font-size:11px; letter-spacing:.08em; text-transform:uppercase; color:var(--dim); margin-bottom:6px; font-family:'IBM Plex Mono',monospace;}
+  select,input{width:100%; background:rgba(255,255,255,0.04); border:1px solid var(--line); color:var(--chalk); border-radius:8px; padding:11px 12px; font-family:'Inter',sans-serif; font-size:14px;}
+  select:focus,input:focus{outline:none; border-color:var(--amber);}
+  select option{background:#0C2A20; color:#F2F5EF;}
+  .grid3{display:grid; grid-template-columns:1fr 1fr 1fr; gap:14px;}
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:14px;}
+  .grid4{display:grid; grid-template-columns:repeat(4,1fr); gap:14px;}
+  @media(max-width:800px){.grid3,.grid2,.grid4{grid-template-columns:1fr;}}
+  .btn{margin-top:16px; width:100%; background:var(--amber); color:var(--ink); border:none; border-radius:8px; padding:14px; font-family:'Oswald',sans-serif; font-size:15px; letter-spacing:.06em; text-transform:uppercase; font-weight:600; cursor:pointer; transition:filter .15s;}
+  .btn:hover{filter:brightness(1.08);} .btn:disabled{opacity:.5; cursor:wait;}
+  .btn.ghost{background:transparent; color:var(--chalk); border:1px solid var(--line);}
+  .status{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--dim); margin-top:10px; min-height:16px;}
+  .pill{font-family:'IBM Plex Mono',monospace; font-size:10px; padding:3px 9px; border-radius:100px; border:1px solid var(--line); color:var(--dim);}
+  .pill.ok{color:var(--green); border-color:rgba(51,194,127,.4); background:rgba(51,194,127,.1);}
+  .pill.warn{color:var(--amber); border-color:rgba(232,163,61,.4); background:rgba(232,163,61,.1);}
+  table{width:100%; border-collapse:collapse; font-size:13.5px;}
+  th,td{text-align:left; padding:10px 8px; border-bottom:1px solid rgba(29,76,58,.6);}
+  th{font-family:'IBM Plex Mono',monospace; font-size:10.5px; letter-spacing:.1em; text-transform:uppercase; color:var(--dim); font-weight:500;}
+  td.num,th.num{text-align:right; font-family:'IBM Plex Mono',monospace;}
+  .best{color:var(--green); font-weight:600;}
+  .value{color:var(--amber); font-weight:600;}
+  .bar{height:34px; border-radius:6px; background:rgba(255,255,255,.05); overflow:hidden; position:relative; margin-bottom:8px;}
+  .bar > i{position:absolute; inset:0 auto 0 0; display:block; border-radius:6px;}
+  .bar span{position:relative; z-index:1; display:flex; justify-content:space-between; align-items:center; height:100%; padding:0 12px; font-size:13px; font-weight:600;}
+  .bar.h > i{background:linear-gradient(90deg,#1E8F5E,#33C27F);} 
+  .bar.d > i{background:linear-gradient(90deg,#4A5C54,#7C8F85);}
+  .bar.a > i{background:linear-gradient(90deg,#B4762A,#E8A33D);}
+  .verdict{border:1px solid var(--amber); border-radius:12px; padding:22px; background:linear-gradient(180deg,rgba(232,163,61,.12),rgba(232,163,61,.03));}
+  .verdict .who{font-family:'Oswald',sans-serif; font-size:clamp(24px,3.6vw,36px); text-transform:uppercase; margin:6px 0 6px;}
+  .verdict .conf{font-family:'IBM Plex Mono',monospace; font-size:12px; color:var(--dim);}
+  .chips{display:flex; gap:8px; flex-wrap:wrap; margin-top:14px;}
+  .chip{border:1px solid var(--line); border-radius:100px; padding:6px 12px; font-size:12px; color:var(--dim); background:rgba(255,255,255,.03);}
+  .chip b{color:var(--chalk);}
+  .note{color:var(--dim); font-size:12.5px; line-height:1.6;}
+  .warnbox{border:1px solid rgba(232,163,61,.4); background:rgba(232,163,61,.08); border-radius:10px; padding:14px; font-size:12.5px; line-height:1.6; color:#EBD9BC;}
+  .rivalbox{border:1px solid rgba(224,87,76,.45); background:rgba(224,87,76,.09); border-radius:10px; padding:12px 14px; font-size:12.5px; line-height:1.6; color:#F3D9D6; margin-top:16px;}
+  .rivalbox b{color:var(--red);}
+  footer{margin-top:34px; padding-top:18px; border-top:1px solid var(--line); font-size:12px; color:var(--dim); line-height:1.7;}
+  .kv{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px dashed rgba(29,76,58,.6); font-size:13px;}
+  .kv span:last-child{font-family:'IBM Plex Mono',monospace;}
+  .hint{font-size:11px; color:var(--dim); margin-top:5px; line-height:1.5;}
+  .sticky-dl{position:fixed; right:16px; bottom:16px; z-index:5;}
+  .sticky-dl button{width:auto; padding:12px 18px; margin:0; box-shadow:0 8px 24px rgba(0,0,0,.4);}
+</style>
+</head>
+<body>
+<div class="flagline"></div>
+<div class="wrap">
+  <header>
+    <p class="eyebrow">Soka Edge KE · Nairobi</p>
+    <h1>Real Odds Analyser &amp; Match Verdict</h1>
+    <p class="sub">Pick a league and two teams. The tool pulls real recent results and head-to-head history from a public football feed, builds a Poisson goal model, then leans it with the same "soft" factors bookmakers' own traders use — squad news, motivation, media/tipster lean and derby history — before comparing it against the prices you see on Kenyan books (SportPesa, Betika, Odibets, Betway KE, 1xBet, 22Bet). It returns one clear call: who is likely to win, and whether the price is worth a KES stake after excise and withholding tax.</p>
+  </header>
+
+  <div class="panel">
+    <h2>1 · Select the fixture <span class="pill" id="teamsStatus">loading teams…</span></h2>
+    <div class="grid3">
+      <div>
+        <label>League</label>
+        <select id="league"></select>
+      </div>
+      <div>
+        <label>Home team</label>
+        <select id="homeSel"><option>—</option></select>
+      </div>
+      <div>
+        <label>Away team</label>
+        <select id="awaySel"><option>—</option></select>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:14px;">
+      <div>
+        <label>Matches of form to use</label>
+        <select id="formN"><option value="5" selected>Last 5 (feed limit)</option><option value="8">Last 8</option><option value="10">Last 10</option></select>
+      </div>
+      <div>
+        <label>Home advantage</label>
+        <select id="hadv"><option value="1.0">Neutral venue</option><option value="1.18" selected>Normal (Kenyan/European league)</option><option value="1.32">Fortress / hostile crowd</option></select>
+      </div>
+      <div>
+        <label>Key-player availability skew</label>
+        <select id="avail"><option value="0" selected>Both squads normal</option><option value="1">Home missing key players</option><option value="-1">Away missing key players</option></select>
+      </div>
+    </div>
+    <div class="rivalbox" id="rivalBox" style="display:none;"></div>
+    <h2 style="margin-top:18px;">Word-on-the-street signals <span class="pill" id="signalHint">optional — fill in what you've read/heard</span></h2>
+    <div class="grid3">
+      <div>
+        <label>Tipster / media consensus</label>
+        <select id="mediaLean">
+          <option value="0" selected>No strong lean either way</option>
+          <option value="0.05">Pundits mildly favour home</option>
+          <option value="0.1">Press strongly backing home</option>
+          <option value="-0.05">Pundits mildly favour away</option>
+          <option value="-0.1">Press strongly backing away</option>
+        </select>
+        <div class="hint">What sports journalists / tipster columns are actually saying — not a stat, but it often prices in team-news the model can't see yet.</div>
+      </div>
+      <div>
+        <label>Motivation — home side</label>
+        <select id="motivH">
+          <option value="1" selected>Normal league business</option>
+          <option value="1.08">Must-win (title / relegation / cup)</option>
+          <option value="0.9">Dead rubber — nothing to play for</option>
+          <option value="0.93">Fixture pile-up / fatigued squad</option>
+        </select>
+      </div>
+      <div>
+        <label>Motivation — away side</label>
+        <select id="motivA">
+          <option value="1" selected>Normal league business</option>
+          <option value="1.08">Must-win (title / relegation / cup)</option>
+          <option value="0.9">Dead rubber — nothing to play for</option>
+          <option value="0.93">Fixture pile-up / fatigued squad</option>
+        </select>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:14px;">
+      <div>
+        <label>Squad news — home side</label>
+        <select id="newsH">
+          <option value="1" selected>Full strength / settled XI</option>
+          <option value="0.95">Minor injury doubts</option>
+          <option value="0.88">Missing 2+ key starters</option>
+          <option value="0.8">Squad unrest / managerial crisis</option>
+        </select>
+      </div>
+      <div>
+        <label>Squad news — away side</label>
+        <select id="newsA">
+          <option value="1" selected>Full strength / settled XI</option>
+          <option value="0.95">Minor injury doubts</option>
+          <option value="0.88">Missing 2+ key starters</option>
+          <option value="0.8">Squad unrest / managerial crisis</option>
+        </select>
+      </div>
+      <div>
+        <label>Rivalry intensity (0 none – 10 fierce derby)</label>
+        <input type="number" id="rivalry" value="0" min="0" max="10" step="1">
+        <div class="hint" id="rivalryHint">Auto-fills when the two teams are a known derby — override if local knowledge says otherwise.</div>
+      </div>
+    </div>
+    <button class="btn" id="runBtn">Analyse fixture</button>
+    <div class="status" id="runStatus"></div>
+  </div>
+
+  <div class="panel" id="modelPanel" style="display:none;">
+    <h2>2 · Model read <span class="pill ok" id="dataPill">real form data</span></h2>
+    <div id="formEdit" style="margin-bottom:18px;"></div>
+    <div class="grid2">
+      <div>
+        <div class="bar h"><i id="barH"></i><span><b id="labH">Home</b><b id="pH">0%</b></span></div>
+        <div class="bar d"><i id="barD"></i><span><b>Draw</b><b id="pD">0%</b></span></div>
+        <div class="bar a"><i id="barA"></i><span><b id="labA">Away</b><b id="pA">0%</b></span></div>
+        <div class="chips" id="marketChips"></div>
+      </div>
+      <div>
+        <table id="formTable"></table>
+      </div>
+    </div>
+    <div id="h2hBlock" style="margin-top:16px;"></div>
+  </div>
+
+  <div class="panel" id="oddsPanel" style="display:none;">
+    <h2>3 · Kenyan bookmaker prices <span class="pill warn">decimal odds, as shown in-app</span></h2>
+    <p class="note" style="margin-top:-6px;">Type in the 1 / X / 2 decimal odds you can actually see right now on each site. Blank rows are ignored. The board flags the best price per outcome and the model's edge against it.</p>
+    <table id="oddsTable"></table>
+    <button class="btn ghost" id="calcOdds" style="margin-top:14px;">Recalculate value</button>
+
+    <div style="margin-top:20px; padding-top:16px; border-top:1px dashed rgba(29,76,58,.6);">
+      <label>Reference odds — international books (optional)</label>
+      <div class="hint" style="margin-bottom:8px;">SportPesa, Betika, Odibets etc. don't publish a public odds feed, so those rows above can't be auto-filled — you have to type what you see in-app. What <i>can</i> be pulled live is a benchmark price from international books via The Odds API, for leagues it covers (KPL isn't one of them). Useful as a sanity check on whether the KE price you typed is generous or stingy vs. the wider market.</div>
+      <div class="grid3">
+        <div><button class="btn ghost" id="fetchRefOdds" type="button">Pull reference odds</button></div>
+      </div>
+      <div class="status" id="refOddsStatus"></div>
+    </div>
+  </div>
+
+  <div class="panel" id="stakePanel" style="display:none;">
+    <h2>4 · KES stake &amp; tax calculator</h2>
+    <div class="grid4">
+      <div><label>Stake (KES)</label><input type="number" id="stake" value="500" min="0" step="50"></div>
+      <div><label>Excise duty on stake (%)</label><input type="number" id="excise" value="15" min="0" step="0.5"><div class="hint">Deducted before the bet is placed.</div></div>
+      <div><label>Withholding tax on winnings (%)</label><input type="number" id="wht" value="20" min="0" step="1"><div class="hint">Charged on profit, not the stake.</div></div>
+      <div><label>Bankroll (KES, optional)</label><input type="number" id="bankroll" value="10000" min="0" step="500"></div>
+    </div>
+    <div class="warnbox" style="margin-top:14px;">Tax rates change with every Finance Act. Confirm the current excise and withholding rates with KRA or on your bookmaker's slip before trusting the net figure — the fields above are editable for exactly that reason.</div>
+    <div id="stakeOut" style="margin-top:14px;"></div>
+  </div>
+
+  <div class="panel" id="verdictPanel" style="display:none;">
+    <h2>5 · Final decision</h2>
+    <div class="verdict">
+      <div class="eyebrow">Most likely outcome</div>
+      <div class="who" id="verdictWho">—</div>
+      <div class="conf" id="verdictConf"></div>
+      <div class="chips" id="verdictChips"></div>
+      <p class="note" id="verdictText" style="margin-top:16px;"></p>
+    </div>
+    <div style="margin-top:16px;">
+      <div class="eyebrow" style="margin-bottom:8px;">Why the model leans this way</div>
+      <table id="whyTable"></table>
+    </div>
+  </div>
+
+  <footer>
+    Form and fixture data: TheSportsDB public feed. Odds are entered by you from Kenyan-licensed bookmakers. This is an analysis tool, not betting advice and not a betting service — the bookmaker's margin plus 15% excise and 20% withholding tax means most punters lose over time. Betting in Kenya is licensed by the BCLB and restricted to 18+. If it stops being fun, talk to someone — the Kenya Red Cross counselling line 1199 is free.
+  </footer>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+const SDB = "https://www.thesportsdb.com/api/v1/json/3";
+const SUPABASE_URL = "https://mavfxruumlqxtqsuojap.supabase.co";
+const SUPABASE_ANON_KEY = "sb_publishable_YfhJ0HCk8mY5REodTn6_7w_5NIallyL";
+const sb = window.supabase ? window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
+
+function debounce(fn, ms){
+  let t;
+  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
+}
+async function loadOverrideFromDB(teamName){
+  if(!sb) return null;
+  try{
+    const { data, error } = await sb.from("manual_form_overrides").select("n,w,d,l,gf,ga").eq("team_name", teamName).maybeSingle();
+    if(error || !data) return null;
+    return data;
+  }catch(e){ return null; }
+}
+const saveOverrideToDB = debounce(async (teamName, o) => {
+  if(!sb) return;
+  try{
+    await sb.from("manual_form_overrides").upsert({ team_name: teamName, ...o, updated_at: new Date().toISOString() });
+  }catch(e){ console.error("Failed to save override to Supabase:", e); }
+}, 700);
+async function deleteOverrideFromDB(teamName){
+  if(!sb) return;
+  try{ await sb.from("manual_form_overrides").delete().eq("team_name", teamName); }catch(e){ console.error("Failed to delete override:", e); }
+}
+const LEAGUES = [
+  {id:"4745", name:"Kenyan Premier League (FKF-PL)", q:"Kenyan Premier League", teams:["AFC Leopards","APS Bomet","Bandari","Bidco United","Gor Mahia","Kakamega Homeboyz","Kariobangi Sharks","KCB","Kenya Police","Mara Sugar","Murang'a Seal","Nairobi City Stars","Posta Rangers","Shabana","Sofapaka","Tusker","Ulinzi Stars","Mathare United"]},
+  {id:"4328", name:"English Premier League", q:"English Premier League", teams:["Arsenal","Aston Villa","Bournemouth","Brentford","Brighton","Burnley","Chelsea","Crystal Palace","Everton","Fulham","Leeds United","Liverpool","Manchester City","Manchester United","Newcastle United","Nottingham Forest","Sunderland","Tottenham","West Ham United","Wolverhampton Wanderers"]},
+  {id:"4335", name:"Spanish La Liga", q:"Spanish La Liga", teams:["Alaves","Athletic Bilbao","Atletico Madrid","Barcelona","Celta Vigo","Elche","Espanyol","Getafe","Girona","Levante","Mallorca","Osasuna","Rayo Vallecano","Real Betis","Real Madrid","Real Oviedo","Real Sociedad","Sevilla","Valencia","Villarreal"]},
+  {id:"4332", name:"Italian Serie A", q:"Italian Serie A", teams:["Atalanta","Bologna","Cagliari","Como","Cremonese","Fiorentina","Genoa","Inter Milan","Juventus","Lazio","Lecce","AC Milan","Napoli","Parma","Pisa","Roma","Sassuolo","Torino","Udinese","Hellas Verona"]},
+  {id:"4331", name:"German Bundesliga", q:"German Bundesliga", teams:["Augsburg","Bayer Leverkusen","Bayern Munich","Borussia Dortmund","Borussia Monchengladbach","Eintracht Frankfurt","Freiburg","Hamburg","Heidenheim","Hoffenheim","FC Koln","Mainz","RB Leipzig","St Pauli","Stuttgart","Union Berlin","Werder Bremen","Wolfsburg"]},
+  {id:"4334", name:"French Ligue 1", q:"French Ligue 1", teams:["Angers","Auxerre","Brest","Le Havre","Lens","Lille","Lorient","Lyon","Marseille","Metz","Monaco","Nantes","Nice","Paris FC","Paris Saint-Germain","Rennes","Strasbourg","Toulouse"]},
+  {id:"4401", name:"French Ligue 2", q:"French Ligue 2", teams:["Annecy","Boulogne","Clermont","Dijon","Dunkerque","Grenoble","Guingamp","Laval","Metz","Montpellier","Nancy","Nantes","Pau","Red Star","Reims","Rodez","Saint-Étienne","Sochaux"]},
+  {id:"4329", name:"English Championship", q:"English League Championship", teams:["Birmingham City","Blackburn Rovers","Bolton Wanderers","Bristol City","Burnley","Cardiff City","Charlton Athletic","Derby County","Lincoln City","Middlesbrough","Millwall","Norwich City","Portsmouth","Preston North End","Queens Park Rangers","Sheffield United","Southampton","Stoke City","Swansea City","Watford","West Bromwich Albion","West Ham United","Wolverhampton Wanderers","Wrexham"]}
+];
+const BOOKS = ["SportPesa","Betika","Odibets","Betway KE","1xBet KE","22Bet KE"];
+// Maps our TheSportsDB league ids to The Odds API's sport keys, for the
+// optional international reference-odds pull. KPL has no entry — that
+// league genuinely isn't covered by this provider, so we say so rather
+// than silently failing.
+const ODDS_API_LEAGUE_MAP = {
+  "4328":"soccer_epl", "4335":"soccer_spain_la_liga", "4332":"soccer_italy_serie_a",
+  "4331":"soccer_germany_bundesliga", "4334":"soccer_france_ligue_one",
+  "4329":"soccer_efl_champ", "4401":"soccer_france_ligue_two"
+};
+
+/* Known derbies / grudge fixtures per league. intensity 0-1 feeds the "rivalry"
+   input (0-10) as intensity*10, and is what compresses the model toward a
+   closer, more draw-prone read the way an experienced pundit would discount
+   raw form for a needle match. Kept to fixtures with a well-documented rivalry
+   history rather than every possible pairing. */
+const DERBIES = {
+  "4745":[
+    {a:"Gor Mahia", b:"AFC Leopards", name:"Mashemeji Derby", intensity:0.95,
+     note:"Kenya's fiercest rivalry. Historically tighter, more foul-heavy and more draw-prone than either side's league form alone suggests."}
+  ],
+  "4328":[
+    {a:"Arsenal", b:"Tottenham", name:"North London Derby", intensity:0.85, note:"League position often counts for less than usual on derby day."},
+    {a:"Liverpool", b:"Everton", name:"Merseyside Derby", intensity:0.8, note:"Historically tight and physical — one of England's lowest average-margin derbies."},
+    {a:"Manchester United", b:"Manchester City", name:"Manchester Derby", intensity:0.8, note:"High-stakes local rivalry; recent meetings have been unusually unpredictable."},
+    {a:"Manchester United", b:"Liverpool", name:"Man Utd v Liverpool", intensity:0.85, note:"England's most storied fixture — big-occasion unpredictability tends to narrow the gap."},
+    {a:"Chelsea", b:"Tottenham", name:"London rivalry", intensity:0.6, note:"Combative London derby; form usually matters less than the occasion."},
+    {a:"West Ham United", b:"Tottenham", name:"London rivalry", intensity:0.5, note:"Feisty East vs North London meeting."}
+  ],
+  "4335":[
+    {a:"Real Madrid", b:"Barcelona", name:"El Clasico", intensity:1.0, note:"The biggest club fixture in the world — table position is often a poor guide."},
+    {a:"Real Madrid", b:"Atletico Madrid", name:"Madrid Derby", intensity:0.75, note:"Atletico's organisation and physicality historically narrow the gap regardless of form."},
+    {a:"Sevilla", b:"Real Betis", name:"Seville Derby", intensity:0.85, note:"One of Europe's most hostile derbies — home advantage is amplified further here."},
+    {a:"Barcelona", b:"Espanyol", name:"Barcelona Derby", intensity:0.55, note:"Local rivalry — Espanyol traditionally raise their level for this one."}
+  ],
+  "4332":[
+    {a:"AC Milan", b:"Inter Milan", name:"Derby della Madonnina", intensity:0.9, note:"Tactical, tight, often lower-scoring than both sides' season averages."},
+    {a:"Roma", b:"Lazio", name:"Derby della Capitale", intensity:0.9, note:"Among Europe's most volatile derbies — form counts for less."},
+    {a:"Juventus", b:"Torino", name:"Derby della Mole", intensity:0.55, note:"Torino traditionally punch above their league position in this fixture."},
+    {a:"Napoli", b:"Juventus", name:"Historic rivalry", intensity:0.55, note:"Fierce non-geographic rivalry with an unusually heated atmosphere."}
+  ],
+  "4331":[
+    {a:"Borussia Dortmund", b:"Bayern Munich", name:"Der Klassiker", intensity:0.65, note:"Germany's biggest fixture, though Bayern's squad depth usually still tells in the end."},
+    {a:"FC Koln", b:"Borussia Monchengladbach", name:"Rhine Derby", intensity:0.7, note:"Local pride tightens the gap between the sides."}
+  ],
+  "4334":[
+    {a:"Paris Saint-Germain", b:"Marseille", name:"Le Classique", intensity:0.85, note:"France's fiercest rivalry — PSG's quality usually still wins out, but margins compress."},
+    {a:"Nice", b:"Monaco", name:"Cote d'Azur Derby", intensity:0.5, note:"Regional rivalry along the French Riviera."}
+  ],
+  "4401":[
+    {a:"Nancy", b:"Metz", name:"Lorraine Derby", intensity:0.7, note:"Historic Lorraine rivalry — local pride tends to matter more than league form."}
+  ],
+  "4329":[
+    {a:"West Bromwich Albion", b:"Wolverhampton Wanderers", name:"Black Country Derby", intensity:0.85, note:"One of England's fiercest local rivalries — table position rarely settles this one."},
+    {a:"Portsmouth", b:"Southampton", name:"South Coast Derby", intensity:0.9, note:"Among the most hostile derbies in English football — expect a tighter, more combative game than form suggests."}
+  ]
+};
+function findDerby(leagueId, hName, aName){
+  const list = DERBIES[leagueId] || [];
+  return list.find(d => (d.a===hName && d.b===aName) || (d.a===aName && d.b===hName)) || null;
+}
+function updateRivalry(){
+  const lg = $("league").value, hName = $("homeSel").value, aName = $("awaySel").value;
+  const d = findDerby(lg, hName, aName);
+  const box = $("rivalBox");
+  if(d){
+    box.style.display = "block";
+    box.innerHTML = `<b>⚔ ${d.name}</b> — this is a known derby/rivalry fixture. ${d.note}`;
+    $("rivalry").value = Math.round(d.intensity*10);
+    $("rivalryHint").textContent = `Auto-filled from the ${d.name} rivalry file. Edit if you know something more specific about current tensions.`;
+  } else {
+    box.style.display = "none";
+    if(+$("rivalry").value === 0 || $("rivalry").dataset.auto === "1") $("rivalry").value = 0;
+    $("rivalryHint").textContent = "Auto-fills when the two teams are a known derby — override if local knowledge says otherwise.";
+  }
+}
+["homeSel","awaySel"].forEach(id => document.addEventListener("change", e => { if(e.target && e.target.id===id) updateRivalry(); }));
+
+const $ = id => document.getElementById(id);
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const pct = v => (v*100).toFixed(1)+"%";
+const ksh = v => "KES " + Math.round(v).toLocaleString("en-KE");
+let teams = [], model = null;
+
+/* ---------- team dropdowns ---------- */
+LEAGUES.forEach(l => { const o=document.createElement("option"); o.value=l.id; o.textContent=l.name; $("league").appendChild(o); });
+
+async function loadTeams(){
+  const lg = LEAGUES.find(l=>l.id===$("league").value);
+  $("teamsStatus").textContent = "loading teams…"; $("teamsStatus").className="pill warn";
+  const byName = new Map();
+  lg.teams.forEach(n => byName.set(n.toLowerCase(), {id:null, name:n}));
+  let live = 0;
+  try{
+    const r = await fetch(`${SDB}/search_all_teams.php?l=${encodeURIComponent(lg.q)}`);
+    const d = await r.json();
+    (d.teams||[]).forEach(t => { byName.set(t.strTeam.toLowerCase(), {id:t.idTeam, name:t.strTeam}); live++; });
+  }catch(e){}
+  teams = [...byName.values()].sort((a,b)=>a.name.localeCompare(b.name));
+  fillSel($("homeSel"), 0); fillSel($("awaySel"), 1);
+  $("teamsStatus").textContent = `${teams.length} teams · ${lg.name}`;
+  $("teamsStatus").className = "pill ok";
+}
+function fillSel(sel, defIdx){
+  sel.innerHTML = "";
+  teams.forEach((t,i)=>{ const o=document.createElement("option"); o.value=t.name; o.textContent=t.name; if(i===defIdx) o.selected=true; sel.appendChild(o); });
+}
+$("league").addEventListener("change", loadTeams);
+loadTeams();
+
+/* ---------- data pull ---------- */
+async function fetchForm(name, n){
+  try{
+    const d = await (await fetch(`/.netlify/functions/form?team=${encodeURIComponent(name)}&n=${n}`)).json();
+    const events = (d.matches||[]).map(m => ({
+      idHomeTeam: m.homeTeamId, idAwayTeam: m.awayTeamId,
+      intHomeScore: m.homeGoals, intAwayScore: m.awayGoals
+    }));
+    return {teamId: d.teamId, events};
+  }catch(e){ return {teamId:null, events:[]}; }
+}
+async function fetchH2H(hName, aName){
+  try{
+    const d = await (await fetch(`/.netlify/functions/h2h?team1=${encodeURIComponent(hName)}&team2=${encodeURIComponent(aName)}`)).json();
+    const list = (d.fixtures||[]).map(f => ({
+      strHomeTeam: f.homeTeam, strAwayTeam: f.awayTeam,
+      intHomeScore: f.homeGoals, intAwayScore: f.awayGoals
+    }));
+    return {n: list.length, list};
+  }catch(e){ return {n:0, list:[]}; }
+}
+function summariseH2H(h2hRaw, hName){
+  let hW=0, dr=0, aW=0;
+  h2hRaw.list.forEach(e=>{
+    const homeIsH = e.strHomeTeam === hName;
+    const hs = +e.intHomeScore, asc = +e.intAwayScore;
+    const forH = homeIsH ? hs : asc, forA = homeIsH ? asc : hs;
+    if(forH>forA) hW++; else if(forH===forA) dr++; else aW++;
+  });
+  const n = h2hRaw.list.length;
+  return {n, hW, d:dr, aW, hRate:n?hW/n:null, dRate:n?dr/n:null, aRate:n?aW/n:null, list:h2hRaw.list};
+}
+function summarise(events, teamId, n){
+  const list = events.slice(0, n);
+  let gf=0, ga=0, w=0, dr=0, l=0, hGF=0, hGA=0, hN=0, aGF=0, aGA=0, aN=0, seq=[];
+  list.forEach(e=>{
+    const home = e.idHomeTeam === teamId;
+    const f = +(home ? e.intHomeScore : e.intAwayScore);
+    const a = +(home ? e.intAwayScore : e.intHomeScore);
+    gf+=f; ga+=a;
+    if(home){hGF+=f; hGA+=a; hN++;} else {aGF+=f; aGA+=a; aN++;}
+    if(f>a){w++; seq.push("W");} else if(f===a){dr++; seq.push("D");} else {l++; seq.push("L");}
+  });
+  return {n:list.length, gf, ga, w, d:dr, l, seq,
+          homeGF:hN?hGF/hN:null, homeGA:hN?hGA/hN:null, awayGF:aN?aGF/aN:null, awayGA:aN?aGA/aN:null};
+}
+function stats(o){
+  const n = Math.max(1, o.n);
+  return {...o, ppg:(o.w*3+o.d)/n, gfpg:o.gf/n, gapg:o.ga/n};
+}
+
+/* ---------- editable form block ---------- */
+function formInputs(side, label, pulled, disp, hasOverride){
+  disp = disp || pulled;
+  const resetBtn = hasOverride ? ` <button type="button" class="btn ghost fi-reset" data-s="${side}" style="padding:2px 8px;font-size:12px;">reset to live data</button>` : "";
+  return `<div style="margin-bottom:6px;"><b>${label}</b> <span class="pill ${pulled.n>=3?"ok":"warn"}">${pulled.n} match${pulled.n===1?"":"es"} pulled</span>${hasOverride?' <span class="pill warn">your edits saved</span>':""}${resetBtn}</div>
+  <div class="grid3">
+    <div><label>Matches</label><input type="number" class="fi" data-s="${side}" data-f="n" value="${disp.n}" min="1" max="20"></div>
+    <div><label>Wins</label><input type="number" class="fi" data-s="${side}" data-f="w" value="${disp.w}" min="0"></div>
+    <div><label>Draws</label><input type="number" class="fi" data-s="${side}" data-f="d" value="${disp.d}" min="0"></div>
+    <div><label>Losses</label><input type="number" class="fi" data-s="${side}" data-f="l" value="${disp.l}" min="0"></div>
+    <div><label>Goals scored</label><input type="number" class="fi" data-s="${side}" data-f="gf" value="${disp.gf}" min="0"></div>
+    <div><label>Goals conceded</label><input type="number" class="fi" data-s="${side}" data-f="ga" value="${disp.ga}" min="0"></div>
+  </div>
+  <div class="hint">Pulled live where the public feed has it. Kenyan league coverage is patchy off-season — correct or top up these numbers by hand; your edits are now kept even if you re-run or switch fixtures and come back to this team.</div>`;
+}
+function readForm(side, base){
+  const o = {...base};
+  document.querySelectorAll(`.fi[data-s="${side}"]`).forEach(el => { o[el.dataset.f] = Math.max(0, +el.value||0); });
+  o.n = Math.max(1, o.n);
+  return stats(o);
+}
+
+/* ---------- poisson model ---------- */
+function pois(k, lam){ let p=Math.exp(-lam); for(let i=1;i<=k;i++) p=p*lam/i; return p; }
+function readNarrative(){
+  return {
+    mediaLean: +$("mediaLean").value,
+    newsH: +$("newsH").value,
+    newsA: +$("newsA").value,
+    motivH: +$("motivH").value,
+    motivA: +$("motivA").value,
+    rivalry: clamp(+$("rivalry").value || 0, 0, 10)
+  };
+}
+function buildModel(hs, as_, hadv, availSkew, narrative, h2h){
+  const leagueAvg = clamp((hs.gfpg + as_.gfpg + hs.gapg + as_.gapg) / 4, 0.8, 2.6);
+  const hAtt = (hs.homeGF ?? hs.gfpg) / leagueAvg;
+  const hDef = (hs.homeGA ?? hs.gapg) / leagueAvg;
+  const aAtt = (as_.awayGF ?? as_.gfpg) / leagueAvg;
+  const aDef = (as_.awayGA ?? as_.gapg) / leagueAvg;
+  const formAdj = 1 + 0.06 * (hs.ppg - as_.ppg) / 3;
+  let lamH = clamp(leagueAvg * hAtt * aDef * hadv * formAdj, 0.3, 4.0);
+  let lamA = clamp(leagueAvg * aAtt * hDef * (2 - formAdj), 0.25, 3.8);
+  if(availSkew === 1){ lamH *= 0.88; lamA *= 1.06; }
+  if(availSkew === -1){ lamA *= 0.88; lamH *= 1.06; }
+  /* squad news & motivation — the "what people close to the club are saying" inputs */
+  lamH = clamp(lamH * narrative.newsH * narrative.motivH, 0.15, 4.2);
+  lamA = clamp(lamA * narrative.newsA * narrative.motivA, 0.15, 4.0);
+  const shrink = clamp((hs.n + as_.n) / 12, 0.35, 1);
+
+  let pH=0,pD=0,pA=0,btts=0,ov25=0; const scores=[];
+  for(let i=0;i<=8;i++) for(let j=0;j<=8;j++){
+    const p = pois(i,lamH)*pois(j,lamA);
+    if(i>j) pH+=p; else if(i===j) pD+=p; else pA+=p;
+    if(i>0&&j>0) btts+=p;
+    if(i+j>2.5) ov25+=p;
+    scores.push({s:`${i}-${j}`, p});
+  }
+  const tot = pH+pD+pA;
+  const base = {h:0.42, d:0.27, a:0.31};
+  const mix = (v, b) => (v/tot)*shrink + b*(1-shrink);
+  scores.sort((a,b)=>b.p-a.p);
+
+  let ph = mix(pH,base.h), pd = mix(pD,base.d), pa = mix(pA,base.a);
+
+  /* tipster / media consensus — a small, capped nudge, never the deciding factor on its own */
+  if(narrative.mediaLean){
+    ph = clamp(ph + narrative.mediaLean, 0.02, 0.96);
+    pa = clamp(pa - narrative.mediaLean, 0.02, 0.96);
+  }
+
+  /* head-to-head history between these exact two teams — weight grows with sample size, capped at 20% */
+  let h2hWeight = 0;
+  if(h2h && h2h.n > 0){
+    h2hWeight = clamp(h2h.n / 10, 0, 0.2);
+    ph = ph*(1-h2hWeight) + h2h.hRate*h2hWeight;
+    pd = pd*(1-h2hWeight) + h2h.dRate*h2hWeight;
+    pa = pa*(1-h2hWeight) + h2h.aRate*h2hWeight;
+  }
+
+  /* derby / rivalry compression — needle matches run closer than the pure stats say */
+  const rf = narrative.rivalry/10;
+  if(rf > 0){
+    const compress = rf * 0.3, drawBoost = rf * 0.05;
+    ph = ph*(1-compress) + (1/3)*compress;
+    pd = pd*(1-compress) + (1/3)*compress + drawBoost;
+    pa = pa*(1-compress) + (1/3)*compress;
+  }
+  const s = ph+pd+pa; ph/=s; pd/=s; pa/=s;
+
+  return {lamH, lamA, shrink, pH:ph, pD:pd, pA:pa,
+          btts, ov25, scores:scores.slice(0,4), hs, as:as_, h2h, h2hWeight, narrative};
+}
+
+/* ---------- run ---------- */
+let rawH = null, rawA = null, h2h = null;
+let manualOverrides = {}; // teamName -> {n,w,d,l,gf,ga} kept across re-runs and team re-selection
+let sideTeam = {h:null, a:null};
+
+function saveOverride(side){
+  const teamName = sideTeam[side];
+  if(!teamName) return;
+  const o = {};
+  document.querySelectorAll(`.fi[data-s="${side}"]`).forEach(el => { o[el.dataset.f] = Math.max(0, +el.value||0); });
+  manualOverrides[teamName] = o;
+  saveOverrideToDB(teamName, o);
+}
+function clearOverride(side){
+  const teamName = sideTeam[side];
+  if(!teamName) return;
+  delete manualOverrides[teamName];
+  deleteOverrideFromDB(teamName);
+  const base = side === "h" ? rawH : rawA;
+  const label = side === "h" ? model.hName : model.aName;
+  rebuildFormPane(side, label, base);
+  recompute();
+}
+function rebuildFormPane(side, label, base){
+  const override = manualOverrides[label];
+  const disp = override ? stats({...base, ...override}) : base;
+  const pane = side === "h" ? $("formEdit").children[0].children[0] : $("formEdit").children[0].children[1];
+  pane.innerHTML = formInputs(side, label, base, disp, !!override);
+  document.querySelectorAll(`.fi[data-s="${side}"]`).forEach(el => el.addEventListener("input", () => { saveOverride(side); recompute(); }));
+  const rb = pane.querySelector(".fi-reset");
+  if(rb) rb.addEventListener("click", () => clearOverride(side));
+}
+$("runBtn").addEventListener("click", async () => {
+  const hName = $("homeSel").value, aName = $("awaySel").value;
+  if(!hName || !aName || hName === aName){ $("runStatus").textContent = "Pick two different teams."; return; }
+  $("runBtn").disabled = true; $("runStatus").textContent = "pulling recent results and head-to-head history…";
+  const n = +$("formN").value;
+  const [fh, fa, h2hRaw] = await Promise.all([fetchForm(hName, n), fetchForm(aName, n), fetchH2H(hName, aName)]);
+  rawH = summarise(fh.events, fh.teamId, n); rawA = summarise(fa.events, fa.teamId, n);
+  h2h = summariseH2H(h2hRaw, hName);
+  sideTeam = {h:hName, a:aName};
+  if(!manualOverrides[hName]){ const dbH = await loadOverrideFromDB(hName); if(dbH) manualOverrides[hName] = dbH; }
+  if(!manualOverrides[aName]){ const dbA = await loadOverrideFromDB(aName); if(dbA) manualOverrides[aName] = dbA; }
+  const ovH = manualOverrides[hName], ovA = manualOverrides[aName];
+  const dispH = ovH ? stats({...rawH, ...ovH}) : rawH;
+  const dispA = ovA ? stats({...rawA, ...ovA}) : rawA;
+  $("formEdit").innerHTML = `<div class="grid2"><div>${formInputs("h", hName, rawH, dispH, !!ovH)}</div><div>${formInputs("a", aName, rawA, dispA, !!ovA)}</div></div>`;
+  document.querySelectorAll(".fi").forEach(el => el.addEventListener("input", () => { saveOverride(el.dataset.s); recompute(); }));
+  document.querySelectorAll(".fi-reset").forEach(btn => btn.addEventListener("click", () => clearOverride(btn.dataset.s)));
+  model = {hName, aName};
+  recompute();
+  const found = rawH.n + rawA.n;
+  const restoredWho = [ovH?hName:null, ovA?aName:null].filter(Boolean).join(" & ");
+  const restoredNote = restoredWho ? ` · restored your saved edits for ${restoredWho}` : "";
+  $("runStatus").textContent = (found ? `done · ${rawH.n} + ${rawA.n} real matches, ${h2h.n} head-to-head meetings pulled — edit below if the feed missed games`
+                                     : "the public feed had no recent results for these clubs — type their form in below and the model still runs") + restoredNote;
+  $("runBtn").disabled = false;
+});
+
+function recompute(){
+  const hs = readForm("h", rawH), as_ = readForm("a", rawA);
+  const m = buildModel(hs, as_, +$("hadv").value, +$("avail").value, readNarrative(), h2h);
+  m.hName = model.hName; m.aName = model.aName;
+  model = m;
+  render();
+}
+["hadv","avail","mediaLean","newsH","newsA","motivH","motivA"].forEach(id => $(id).addEventListener("change", () => { if(rawH) recompute(); }));
+$("rivalry").addEventListener("input", () => { if(rawH) recompute(); });
+
+function render(){
+  const m = model;
+  ["modelPanel","oddsPanel","stakePanel","verdictPanel"].forEach(p => $(p).style.display = "block");
+  $("dataPill").textContent = m.shrink >= 0.99 ? "full sample" : `thin sample · blended ${Math.round(m.shrink*100)}% model / ${Math.round((1-m.shrink)*100)}% league baseline`;
+  $("dataPill").className = "pill " + (m.shrink >= 0.8 ? "ok" : "warn");
+  $("labH").textContent = m.hName; $("labA").textContent = m.aName;
+  $("pH").textContent = pct(m.pH); $("pD").textContent = pct(m.pD); $("pA").textContent = pct(m.pA);
+  $("barH").style.width = (m.pH*100)+"%"; $("barD").style.width = (m.pD*100)+"%"; $("barA").style.width = (m.pA*100)+"%";
+  $("marketChips").innerHTML = [
+    `Expected goals <b>${m.lamH.toFixed(2)} – ${m.lamA.toFixed(2)}</b>`,
+    `Both teams score <b>${pct(m.btts)}</b>`,
+    `Over 2.5 goals <b>${pct(m.ov25)}</b>`,
+    `Likeliest score <b>${m.scores[0].s}</b>`,
+    `Fair odds <b>${(1/m.pH).toFixed(2)} / ${(1/m.pD).toFixed(2)} / ${(1/m.pA).toFixed(2)}</b>`
+  ].map(t=>`<div class="chip">${t}</div>`).join("");
+
+  const row = (label, h, a) => `<tr><th>${label}</th><td class="num">${h}</td><td class="num">${a}</td></tr>`;
+  $("formTable").innerHTML =
+    `<tr><th>Form</th><th class="num">${m.hName}</th><th class="num">${m.aName}</th></tr>` +
+    row("Matches used", m.hs.n, m.as.n) +
+    row("W–D–L", `${m.hs.w}–${m.hs.d}–${m.hs.l}`, `${m.as.w}–${m.as.d}–${m.as.l}`) +
+    row("Points per game", m.hs.ppg.toFixed(2), m.as.ppg.toFixed(2)) +
+    row("Goals for / game", m.hs.gfpg.toFixed(2), m.as.gfpg.toFixed(2)) +
+    row("Goals against / game", m.hs.gapg.toFixed(2), m.as.gapg.toFixed(2)) +
+    row("Sequence (new→old)", m.hs.seq.join(" ") || "—", m.as.seq.join(" ") || "—");
+
+  buildOddsTable();
+  calcValue();
+}
+
+/* ---------- odds board ---------- */
+function buildOddsTable(){
+  if($("oddsTable").dataset.built === "1"){ relabelOdds(); return; }
+  $("oddsTable").innerHTML =
+    `<tr><th>Bookmaker</th><th class="num" id="thH">1 (home)</th><th class="num">X (draw)</th><th class="num" id="thA">2 (away)</th><th class="num">Margin</th></tr>` +
+    BOOKS.map((b,i)=>`<tr>
+      <td>${b}</td>
+      <td class="num"><input class="od" data-i="${i}" data-o="h" type="number" step="0.01" min="1.01" placeholder="—"></td>
+      <td class="num"><input class="od" data-i="${i}" data-o="d" type="number" step="0.01" min="1.01" placeholder="—"></td>
+      <td class="num"><input class="od" data-i="${i}" data-o="a" type="number" step="0.01" min="1.01" placeholder="—"></td>
+      <td class="num" id="mg${i}">—</td></tr>`).join("") +
+    `<tr><td colspan="5" id="valueRow" style="padding-top:14px;"></td></tr>`;
+  $("oddsTable").dataset.built = "1";
+  document.querySelectorAll(".od").forEach(el => el.addEventListener("input", calcValue));
+  relabelOdds();
+}
+function relabelOdds(){ $("thH").textContent = "1 · " + model.hName; $("thA").textContent = "2 · " + model.aName; }
+
+function readOdds(){
+  const rows = BOOKS.map(()=>({}));
+  document.querySelectorAll(".od").forEach(el=>{ const v=parseFloat(el.value); if(v>1) rows[+el.dataset.i][el.dataset.o]=v; });
+  return rows;
+}
+function bestPrice(rows, o){
+  let best=null;
+  rows.forEach((r,i)=>{ if(r[o] && (!best || r[o]>best.price)) best={price:r[o], book:BOOKS[i]}; });
+  return best;
+}
+$("fetchRefOdds").addEventListener("click", fetchReferenceOdds);
+async function fetchReferenceOdds(){
+  const statusEl = $("refOddsStatus");
+  const leagueId = $("league").value;
+  const sportKey = ODDS_API_LEAGUE_MAP[leagueId];
+  if(!model){ statusEl.textContent = "Run the fixture analysis first."; return; }
+  if(!sportKey){ statusEl.textContent = "This league (KPL) isn't covered by The Odds API — no international reference available, type KE prices in above as usual."; return; }
+  statusEl.textContent = "pulling reference prices…";
+  try{
+    const res = await fetch(`/.netlify/functions/odds?sport=${encodeURIComponent(sportKey)}`);
+    if(!res.ok){
+      let reason = "HTTP "+res.status;
+      try{
+        const errBody = await res.json();
+        reason = errBody?.error || errBody?.message || reason;
+      }catch(_e){ /* body wasn't JSON, keep the HTTP status */ }
+      throw new Error(reason);
+    }
+    const events = await res.json();
+    const match = (events||[]).find(ev=>{
+      const h=(ev.home_team||"").toLowerCase(), a=(ev.away_team||"").toLowerCase();
+      const mh=model.hName.toLowerCase(), ma=model.aName.toLowerCase();
+      return (h.includes(mh.split(" ")[0])||mh.includes(h.split(" ")[0])) && (a.includes(ma.split(" ")[0])||ma.includes(a.split(" ")[0]));
+    });
+    if(!match){ statusEl.textContent = "No live odds posted yet for this exact fixture on the connected books."; return; }
+    const rows = (match.bookmakers||[]).slice(0,4).map(bm=>{
+      const mk = (bm.markets||[]).find(x=>x.key==="h2h");
+      const o = mk ? mk.outcomes : [];
+      const h = o.find(x=>x.name===match.home_team)?.price;
+      const a = o.find(x=>x.name===match.away_team)?.price;
+      const d = o.find(x=>x.name==="Draw")?.price;
+      return {book:bm.title, h, d, a};
+    }).filter(r=>r.h && r.a);
+    if(!rows.length){ statusEl.textContent = "Fixture found but no usable prices returned."; return; }
+    $("refOddsTable")?.remove();
+    const tbl = document.createElement("table");
+    tbl.id = "refOddsTable";
+    tbl.style.marginTop = "10px";
+    tbl.innerHTML = `<tr><th>International book (reference only)</th><th class="num">1</th><th class="num">X</th><th class="num">2</th></tr>` +
+      rows.map(r=>`<tr><td>${r.book}</td><td class="num">${r.h?.toFixed(2)??"—"}</td><td class="num">${r.d?.toFixed(2)??"—"}</td><td class="num">${r.a?.toFixed(2)??"—"}</td></tr>`).join("");
+    $("refOddsStatus").insertAdjacentElement("beforebegin", tbl);
+    statusEl.textContent = `${rows.length} international books pulled live — for comparison only, not one of your six tracked KE books.`;
+  }catch(e){
+    statusEl.textContent = `Couldn't reach the odds API — ${e.message || "check your key, or try again shortly."}`;
+  }
+}
+$("calcOdds").addEventListener("click", calcValue);
+["stake","excise","wht","bankroll"].forEach(id => $(id).addEventListener("input", calcValue));
+
+function calcValue(){
+  if(!model || !model.pH) return;
+  const rows = readOdds();
+  rows.forEach((r,i)=>{
+    const cell = $("mg"+i); if(!cell) return;
+    if(r.h && r.d && r.a){
+      const ov = (1/r.h + 1/r.d + 1/r.a - 1) * 100;
+      cell.textContent = ov.toFixed(1)+"%";
+      cell.className = "num " + (ov < 8 ? "best" : ov > 14 ? "value" : "");
+    } else cell.textContent = "—";
+  });
+  const outcomes = [
+    {k:"h", name:model.hName, p:model.pH},
+    {k:"d", name:"Draw", p:model.pD},
+    {k:"a", name:model.aName, p:model.pA}
+  ].map(o => { const b = bestPrice(rows,o.k); return {...o, best:b, ev: b ? o.p*b.price - 1 : null}; });
+
+  $("valueRow").innerHTML = outcomes.every(o=>!o.best)
+    ? `<span class="note">Enter at least one bookmaker's odds to see value and net KES returns.</span>`
+    : `<table style="margin-top:4px;"><tr><th>Outcome</th><th class="num">Model %</th><th class="num">Best price</th><th class="num">Book</th><th class="num">Edge</th></tr>` +
+      outcomes.map(o=>`<tr><td>${o.name}</td><td class="num">${pct(o.p)}</td>
+        <td class="num ${o.best?"best":""}">${o.best?o.best.price.toFixed(2):"—"}</td>
+        <td class="num">${o.best?o.best.book:"—"}</td>
+        <td class="num ${o.ev!=null && o.ev>0 ? "value":""}">${o.ev!=null?(o.ev*100).toFixed(1)+"%":"—"}</td></tr>`).join("") + `</table>`;
+
+  renderStake(outcomes);
+  renderVerdict(outcomes);
+  renderWhy();
+}
+
+/* ---------- why the model leans this way ---------- */
+function renderWhy(){
+  const m = model, nar = m.narrative;
+  const rows = [];
+  const ppgGap = m.hs.ppg - m.as.ppg;
+  rows.push([`Recent form (points/game)`, `${m.hName} ${m.hs.ppg.toFixed(2)} vs ${m.aName} ${m.as.ppg.toFixed(2)}`,
+    Math.abs(ppgGap)<0.2 ? "Roughly level — small factor either way" : (ppgGap>0?m.hName:m.aName)+" have been picking up more points lately", "real"]);
+  rows.push([`Goals for/against`, `${m.hName} ${m.hs.gfpg.toFixed(2)}/${m.hs.gapg.toFixed(2)} vs ${m.aName} ${m.as.gfpg.toFixed(2)}/${m.as.gapg.toFixed(2)}`,
+    "Feeds directly into the expected-goals model (λH "+m.lamH.toFixed(2)+" · λA "+m.lamA.toFixed(2)+")", "real"]);
+  if(m.h2h && m.h2h.n>0){
+    rows.push([`Head-to-head history`, `${m.h2h.n} past meetings pulled (weight ${(m.h2hWeight*100).toFixed(0)}%)`,
+      `${m.h2h.hW}W–${m.h2h.d}D–${m.h2h.aW}L in ${m.hName}'s favour historically`, "real"]);
+  }
+  if(nar.rivalry>0){
+    rows.push([`Derby / rivalry intensity`, `${nar.rivalry}/10`, "Compresses the gap between the sides — needle matches run closer than pure form suggests", "estimate"]);
+  }
+  if(nar.mediaLean){
+    rows.push([`Tipster / media consensus`, nar.mediaLean>0?"Leaning home":"Leaning away", "Small capped nudge — never the deciding factor on its own", "estimate"]);
+  }
+  if(nar.motivH!==1 || nar.motivA!==1){
+    rows.push([`Motivation context`, `${m.hName}: ${nar.motivH===1?"normal":nar.motivH>1?"must-win":"reduced"} · ${m.aName}: ${nar.motivA===1?"normal":nar.motivA>1?"must-win":"reduced"}`, "You told the model this — not something it inferred", "estimate"]);
+  }
+  if(nar.newsH!==1 || nar.newsA!==1){
+    rows.push([`Squad news`, `${m.hName}: ${nar.newsH===1?"full strength":"weakened"} · ${m.aName}: ${nar.newsA===1?"full strength":"weakened"}`, "You told the model this — not something it inferred", "estimate"]);
+  }
+  $("whyTable").innerHTML = `<tr><th>Factor</th><th>Reading</th><th>Effect</th><th>Source</th></tr>` +
+    rows.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td class="note" style="padding:8px;">${r[2]}</td><td><span class="pill ${r[3]==="real"?"ok":"warn"}">${r[3]==="real"?"live data":"your input"}</span></td></tr>`).join("");
+}
+
+/* ---------- stake / tax ---------- */
+function renderStake(outcomes){
+  const stake = +$("stake").value || 0, ex = (+$("excise").value||0)/100, wt = (+$("wht").value||0)/100;
+  const bank = +$("bankroll").value || 0;
+  const effective = stake * (1 - ex);
+  const pick = [...outcomes].filter(o=>o.best).sort((a,b)=>(b.ev??-9)-(a.ev??-9))[0];
+  if(!pick){ $("stakeOut").innerHTML = `<p class="note">Add odds above to see net payout after excise and withholding tax.</p>`; return; }
+  const gross = effective * pick.best.price;
+  const profit = Math.max(0, gross - effective);
+  const net = effective + profit * (1 - wt);
+  const roi = stake ? ((net - stake) / stake) * 100 : 0;
+  const kelly = pick.ev > 0 ? clamp((pick.p * pick.best.price - 1) / (pick.best.price - 1), 0, 0.25) : 0;
+  $("stakeOut").innerHTML =
+    `<div class="kv"><span>Bet considered</span><span>${pick.name} @ ${pick.best.price.toFixed(2)} (${pick.best.book})</span></div>` +
+    `<div class="kv"><span>Stake typed in</span><span>${ksh(stake)}</span></div>` +
+    `<div class="kv"><span>Excise deducted (${(ex*100).toFixed(1)}%)</span><span>−${ksh(stake-effective)}</span></div>` +
+    `<div class="kv"><span>Amount actually wagered</span><span>${ksh(effective)}</span></div>` +
+    `<div class="kv"><span>Gross payout if it lands</span><span>${ksh(gross)}</span></div>` +
+    `<div class="kv"><span>Withholding tax on winnings (${(wt*100).toFixed(0)}%)</span><span>−${ksh(profit*wt)}</span></div>` +
+    `<div class="kv"><span><b>Net in M-Pesa if it wins</b></span><span><b>${ksh(net)}</b> (${roi>=0?"+":""}${roi.toFixed(1)}% on stake)</span></div>` +
+    `<div class="kv"><span>Model edge on this price</span><span>${pick.ev!=null?((pick.ev*100).toFixed(1)+"%"):"—"}</span></div>` +
+    (bank>0 ? `<div class="kv"><span>Half-Kelly suggested stake</span><span>${kelly>0?ksh(bank*kelly*0.5):"no value — stake nothing"}</span></div>` : "");
+}
+
+/* ---------- verdict ---------- */
+function renderVerdict(outcomes){
+  const m = model;
+  const ranked = [{n:m.hName,p:m.pH,k:"h"},{n:"Draw",p:m.pD,k:"d"},{n:m.aName,p:m.pA,k:"a"}].sort((a,b)=>b.p-a.p);
+  const top = ranked[0], second = ranked[1];
+  const gap = top.p - second.p;
+  const conf = gap > 0.22 ? "High confidence" : gap > 0.10 ? "Moderate confidence" : "Low confidence — this is close to a coin flip";
+  const winner = top.k === "d" ? "Draw — no clear winner" : top.n + " to win";
+  $("verdictWho").textContent = winner;
+  $("verdictConf").textContent = `${conf} · ${pct(top.p)} vs ${pct(second.p)} for ${second.n}`;
+
+  const dc = top.k === "h" ? m.pH + m.pD : top.k === "a" ? m.pA + m.pD : m.pD + Math.max(m.pH, m.pA);
+  const valueBets = (outcomes||[]).filter(o=>o.ev!=null && o.ev > 0.03).sort((a,b)=>b.ev-a.ev);
+  $("verdictChips").innerHTML = [
+    `Safer cover: <b>double chance ${top.k==="h"?"1X":top.k==="a"?"X2":"X plus the stronger side"}</b> at ${pct(dc)}`,
+    `Score line: <b>${m.scores[0].s}</b> then ${m.scores[1].s}`,
+    `Goals: <b>${m.ov25>0.5?"lean over 2.5":"lean under 2.5"}</b> (${pct(m.ov25)})`,
+    valueBets.length ? `Best value: <b>${valueBets[0].name} @ ${valueBets[0].best.price.toFixed(2)} (${valueBets[0].best.book})</b>` : `No positive-value price entered yet`
+  ].map(t=>`<div class="chip">${t}</div>`).join("");
+
+  let text;
+  if(!valueBets.length){
+    text = `The model makes ${winner.toLowerCase()} the most likely result at ${pct(top.p)}, but at the prices entered nothing clears the bookmaker margin plus excise. In Kenyan terms that means skip it or shop another book — being right about the winner and still losing money is the standard way a bankroll bleeds.`;
+  } else {
+    const v = valueBets[0];
+    text = `The form model makes ${winner.toLowerCase()} the most likely result at ${pct(top.p)}. Against the prices you entered, ${v.name} at ${v.best.price.toFixed(2)} on ${v.best.book} carries a ${(v.ev*100).toFixed(1)}% edge — that is the only reason to place it. Stake small and fixed, remember excise comes off before the bet lands and withholding tax comes off the profit, and treat one fixture as one data point, not a signal.`;
+  }
+  $("verdictText").textContent = text;
+}
+
+</script>
+</body>
+</html>
